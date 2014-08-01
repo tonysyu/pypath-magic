@@ -3,9 +3,9 @@ pypath-magic
 ============
 
 
-``pypath-magic`` adds an `IPython magic`_ command for easily manipulating your
-Python path. To use the magic command, just load the extension from an IPython
-session::
+``pypath-magic`` adds an `IPython magic`_ (err... Jupyter_ magic?) command for
+easily manipulating your Python path. To use the magic command, just load the
+extension from an IPython session::
 
    In [1]: %load_ext pypath_magic
 
@@ -29,18 +29,22 @@ a directory and call ``%pypath -a``::
    In [6]: %pypath
    /absolute/path/to/my-repo
 
+Now you can reuse those helper functions::
+
+   In [7]: from plot_helpers import plot_slope_marker
+
 Changes to your python path will persist across IPython sessions, and those
 paths will be available outside of IPython. If you later want to delete
 a directory from your path, just use ``%pypath -d``::
 
-   In [7]: %cd path/to/my-repo
+   In [8]: %cd path/to/my-repo
 
-   In [8]: %pypath -d
+   In [9]: %pypath -d
    Deleted u'/absolute/path/to/my-repo' to path.
 
 You can also list your entire python path with ``%pypath -l``::
 
-   In [9]: %pypath -l
+   In [10]: %pypath -l
 
    /Users/tonysyu/code/yutils
    /Users/tonysyu/code/skimage
@@ -55,9 +59,7 @@ You can also list your entire python path with ``%pypath -l``::
 
 For additional usage information, type::
 
-   In [10]: %pypath?
-
-Ten seems like a good number to stop at.
+   In [11]: %pypath?
 
 
 Install
@@ -89,3 +91,4 @@ New BSD (a.k.a. Modified BSD). See `LICENSE` in this directory for details.
 
 .. _IPython magic:
    http://ipython.org/ipython-doc/dev/interactive/tutorial.html#magic-functions
+.. _Jupyter: http://jupyter.org/
