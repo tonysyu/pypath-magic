@@ -67,7 +67,7 @@ Install
 
 To install using pip::
 
-   $ pip install pypath-magic
+   $ pip install git+https://github.com/tonysyu/pypath-magic
 
 To install from source::
 
