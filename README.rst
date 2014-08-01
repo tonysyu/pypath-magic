@@ -86,9 +86,10 @@ Dependencies
 License
 =======
 
-New BSD (a.k.a. Modified BSD). See `LICENSE` in this directory for details.
+New BSD (a.k.a. Modified BSD). See LICENSE_ file in this directory for details.
 
 
 .. _IPython magic:
    http://ipython.org/ipython-doc/dev/interactive/tutorial.html#magic-functions
 .. _Jupyter: http://jupyter.org/
+.. _LICENSE: https://github.com/tonysyu/pypath-magic/blob/master/LICENSE
