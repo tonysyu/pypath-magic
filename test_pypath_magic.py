@@ -2,7 +2,11 @@ import os
 import sys
 from contextlib import contextmanager
 
-from pypath_magic import PathMagic, join_with_site_packages_dir
+from nose.tools import assert_equal, raises
+from IPython.core.error import UsageError
+
+from pypath_magic import (PathMagic, get_current_directory,
+                          join_with_site_packages_dir)
 
 
 #--------------------------------------------------------------------------
@@ -23,7 +27,7 @@ class TestablePathMagic(PathMagic):
     def __call__(self, *args, **kwargs):
         self.pypath(*args, **kwargs)
 
-    def write(self, line):
+    def _print(self, line):
         """Override write method to save lines instead of printing."""
         self._output.append(line)
 
@@ -44,15 +48,21 @@ class TestablePathMagic(PathMagic):
         self('')  # Calling `pypath` with no arguments lists custom paths.
         lines = self._output.pop()
         if len(lines.strip()):
-            return lines.split('\n')
+            # One path on each line, a space separates the index from path.
+            return [each.split()[1] for each in lines.split('\n')]
         else:
             return []
+
+    def assert_paths_match(self, paths):
+        assert_equal(len(self.current_custom_paths), len(paths))
+        absolute_paths = [os.path.abspath(p) for p in paths]
+        assert_equal(self.current_custom_paths, absolute_paths)
 
 
 @contextmanager
 def cd(path):
     """Temporarily change directory."""
-    original_path = os.getcwdu()
+    original_path = get_current_directory()
     try:
         os.chdir(path)
         yield
@@ -61,27 +71,36 @@ def cd(path):
 
 
 @contextmanager
-def temp_dir(path):
+def make_temp_dirs(paths):
     """Temporarily add directory."""
-    os.mkdir(path)
+    # Copy list to ensure that modifications don't affect removal
+    paths = list(paths)
+    for p in paths:
+        os.makedirs(p)
     try:
         yield
     finally:
-        os.removedirs(path)
+        for p in paths:
+            if os.path.isdir(p):
+                os.removedirs(p)
 
 
 @contextmanager
 def cd_temp_directory(path):
-    with temp_dir(path):
+    with make_temp_dirs([path]):
         with cd(path):
             yield
 
 
 @contextmanager
-def pypath_test_environment():
+def pypath_test_environment(user_paths=()):
+    user_paths = list(user_paths)
     pypath = TestablePathMagic()
     try:
-        yield pypath
+        with make_temp_dirs(user_paths):
+            for p in user_paths:
+                pypath('-a {}'.format(p))
+            yield pypath
     finally:
         if os.path.isfile(pypath.path_file):
             os.remove(pypath.path_file)
@@ -94,7 +113,7 @@ def pypath_test_environment():
 def test_empty():
     with pypath_test_environment() as pypath:
         pypath('')
-        assert pypath.output_buffer == ''
+        assert_equal(pypath.output_buffer, '')
 
 
 def test_list_all_paths():
@@ -102,7 +121,7 @@ def test_list_all_paths():
         pypath('-l')
         expected_paths = set(p for p in sys.path if len(p))
         result = set(p for p in pypath.output_buffer.split() if len(p))
-        assert result == expected_paths
+        assert_equal(result, expected_paths)
 
 
 def test_print_pypath_file_path():
@@ -114,20 +133,76 @@ def test_print_pypath_file_path():
 def test_add_current_directory():
     with pypath_test_environment() as pypath:
         pypath('-a')
-        assert pypath.current_custom_paths[0] == os.getcwdu()
-
-
-def test_add_multiple_directories():
-    with pypath_test_environment() as pypath:
-        pypath('-a')
-        with cd_temp_directory('_dummy_'):
-            pypath('-a')
-        assert len(pypath.current_custom_paths) == 2
-        assert pypath.current_custom_paths[-1].endswith('_dummy_')
+        pypath.assert_paths_match([get_current_directory()])
 
 
 def test_add_and_remove():
     with pypath_test_environment() as pypath:
         pypath('-a')
         pypath('-d')
-        assert len(pypath.current_custom_paths) == 0
+        assert_equal(len(pypath.current_custom_paths), 0)
+
+
+#--------------------------------------------------------------------------
+#  Test `%pypath -a`
+#--------------------------------------------------------------------------
+
+def test_add_multiple_directories():
+    with pypath_test_environment() as pypath:
+        pypath('-a')
+        with cd_temp_directory('_dummy_'):
+            pypath('-a')
+        assert_equal(len(pypath.current_custom_paths), 2)
+        pypath.assert_paths_match(['.', '_dummy_'])
+
+
+def test_add_absolute_path_input():
+    with pypath_test_environment() as pypath:
+        current_directory = get_current_directory()
+        pypath('-a {}'.format(current_directory))
+        pypath.assert_paths_match([current_directory])
+
+
+def test_add_relative_path_input():
+    with make_temp_dirs(['./_dummy_']):
+        with pypath_test_environment() as pypath:
+            pypath('-a {}'.format('_dummy_'))
+            pypath.assert_paths_match(['_dummy_'])
+
+
+@raises(UsageError)
+def test_add_nonexistent_path():
+    with pypath_test_environment() as pypath:
+        pypath('-a path/that/does/not/exist')
+
+
+#--------------------------------------------------------------------------
+#  Test `%pypath -d'
+#--------------------------------------------------------------------------
+
+def test_delete_index():
+    user_paths = ['a/b/c', 'd/e/f', 'g/h', 'i/j']
+    with pypath_test_environment(user_paths=user_paths) as pypath:
+        pypath('-d 1')
+        user_paths.pop(1)
+        pypath.assert_paths_match(user_paths)
+
+
+def test_delete_relative_path():
+    user_paths = ['a/b/c', 'd/e/f', 'g/h', 'i/j']
+    with pypath_test_environment(user_paths=user_paths) as pypath:
+        pypath('-d d/e/f')
+        user_paths.pop(1)
+        pypath.assert_paths_match(user_paths)
+
+
+@raises(UsageError)
+def test_delete_nonexistent_path():
+    with pypath_test_environment() as pypath:
+        pypath('-d path/that/does/not/exist')
+
+
+@raises(UsageError)
+def test_delete_nonexistent_index():
+    with pypath_test_environment() as pypath:
+        pypath('-d 1')

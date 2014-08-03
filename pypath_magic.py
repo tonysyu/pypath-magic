@@ -37,6 +37,13 @@ def touch_file(path):
         pass
 
 
+def is_integer(s):
+    try:
+        return int(s) == float(s)
+    except ValueError:
+        return False
+
+
 @magics_class
 class PathMagic(Magics):
 
@@ -72,61 +79,71 @@ class PathMagic(Magics):
         if not os.path.isfile(self.path_file):
             touch_file(self.path_file)
 
-        opts, args = self.parse_options(line, 'adlp')
-        if args:
-            raise UsageError("%pypath: No arguments allowed.")
+        opts, command_line_args = self.parse_options(line, 'adlp')
         if len(opts) > 1:
-            raise UsageError("%pypath: Only a single option allowed.")
+            self._error("%pypath: Only a single option allowed.")
 
         action = '' if len(opts) == 0 else opts.keys()[0]
 
+        if action not in 'ad' and command_line_args:
+            msg = "No arguments allowed for '%pypath -{}'."
+            raise UsageError(msg.format(action))
+
         user_paths = self._load_user_paths()
-        return self._action_calls[action](user_paths)
-
-    def write(self, line):
-        print(line)
-
-    def write_lines(self, lines):
-        self.write('\n'.join(lines))
+        self._action_calls[action](user_paths, command_line_args)
 
     #--------------------------------------------------------------------------
     #  Action interface
     #--------------------------------------------------------------------------
 
-    def _do_add_path(self, user_paths):
-        current_dir = get_current_directory()
-        if current_dir in user_paths:
-            msg = "{!r} is already in the user path."
-            self.write(msg.format(current_dir))
-            return
+    def _do_add_path(self, user_paths, command_line_args):
+        path = command_line_args or get_current_directory()
+        path = os.path.abspath(path)
+        if path in user_paths:
+            self._error("{!r} is already in the user path.".format(path))
+        elif not os.path.isdir(path):
+            self._error("{!r} does not exist.".format(path))
 
-        self._add_path(current_dir, user_paths)
+        self._add_path(path, user_paths)
         save_lines(self.path_file, user_paths)
-        self.write('Added {!r} to path.'.format(current_dir))
+        self._print('Added {!r} to path.'.format(path))
 
-    def _do_delete_path(self, user_paths):
-        current_dir = get_current_directory()
-        if not current_dir in user_paths:
+    def _do_delete_path(self, user_paths, command_line_args):
+        path = self._parse_path_argument(user_paths, command_line_args)
+        path = os.path.abspath(path)
+        if not path in user_paths:
             msg = "{!r} is not in the user path. Cannot delete."
-            self.write(msg.format(current_dir))
-            return
+            self._error(msg.format(path))
 
-        self._delete_path(current_dir, user_paths)
+        self._delete_path(path, user_paths)
         save_lines(self.path_file, user_paths)
-        self.write('Deleted {!r} from path'.format(current_dir))
+        self._print('Deleted {!r} from path'.format(path))
 
-    def _do_list_all_paths(self, user_paths):
-        self.write_lines(sys.path)
+    def _do_list_all_paths(self, user_paths, command_line_args):
+        self._print_lines(sys.path)
 
-    def _do_list_custom_paths(self, user_paths):
-        self.write_lines(self._load_user_paths())
+    def _do_list_custom_paths(self, user_paths, command_line_args):
+        self._print_lines([self._numbered_format(index=i, path=path)
+                          for i, path in enumerate(user_paths)])
 
-    def _do_print_path_file(self, user_paths):
-        self.write(self.path_file)
+    def _do_print_path_file(self, user_paths, command_line_args):
+        self._print(self.path_file)
 
     #--------------------------------------------------------------------------
     #  Private interface
     #--------------------------------------------------------------------------
+
+    def _print(self, line):
+        print(line)
+
+    def _print_lines(self, lines):
+        self._print('\n'.join(lines))
+
+    def _error(self, message):
+        raise UsageError(message)
+
+    def _numbered_format(self, **kwargs):
+        return '{index}. {path}'.format(**kwargs)
 
     def _load_user_paths(self):
         with open(self.path_file, 'r') as f:
@@ -145,6 +162,29 @@ class PathMagic(Magics):
         """Delete from list for later saving and sys.path for now."""
         user_paths.remove(path)
         sys.path.remove(path)
+
+    def _parse_path_argument(self, user_paths, path_arg):
+        """Return path from input argument.
+
+        Possible `path_arg` values:
+
+            empty:
+                Use current directory.
+            integer:
+                Index into current list of custom user paths.
+            string:
+                A string representing the system path.
+        """
+        if is_integer(path_arg):
+            index = int(path_arg)
+            if index >= len(user_paths):
+                msg = "Index {} exceeds the number of known user paths."
+                self._error(msg.format(index))
+            return user_paths[index]
+        elif len(path_arg):
+            return path_arg
+        else:
+            return get_current_directory()
 
 
 def load_ipython_extension(ipython):
