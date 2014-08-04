@@ -2,7 +2,7 @@
 import setuptools
 
 
-VERSION = '0.1dev'
+VERSION = '0.1'
 
 
 with open('README.rst') as f:
@@ -18,9 +18,14 @@ setup_kwargs = {
     'version': VERSION,
     'license': 'Modified BSD',
     'url': 'http://tonysyu.github.com/pypath_magic',
+    'download_url': 'http://tonysyu.github.com/pypath_magic',
     'classifiers': [
+        'Topic :: Utilities',
+        'Framework :: IPython',
         'Intended Audience :: Developers',
+        'Topic :: Desktop Environment :: File Managers',
     ],
+    'keywords': ['PYTHONPATH', 'utility', 'IPython'],
     'data_files': [('', ['LICENSE', 'README.rst']),],
     'install_requires': ['IPython >= 1.0'],
 }

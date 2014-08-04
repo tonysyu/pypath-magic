@@ -40,7 +40,7 @@ a directory from your path, just use ``%pypath -d``::
    In [8]: %cd path/to/my-repo
 
    In [9]: %pypath -d
-   Deleted u'/absolute/path/to/my-repo' to path.
+   Deleted u'/absolute/path/to/my-repo' from path.
 
 You can also list your entire python path with ``%pypath -l``::
 
