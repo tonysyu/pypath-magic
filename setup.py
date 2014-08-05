@@ -2,7 +2,7 @@
 import setuptools
 
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 
 
 with open('README.rst') as f:
@@ -27,7 +27,6 @@ setup_kwargs = {
         'Topic :: Desktop Environment :: File Managers',
     ],
     'keywords': ['PYTHONPATH', 'utility', 'IPython'],
-    'data_files': [('', ['LICENSE', 'README.rst']),],
     'install_requires': ['IPython >= 1.0'],
 }
 
