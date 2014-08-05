@@ -17,10 +17,7 @@ from distutils.sysconfig import get_python_lib
 
 from IPython.core.error import UsageError
 from IPython.core.magic import Magics, magics_class, line_magic
-
-
-def get_current_directory():
-    return os.getcwdu()
+from IPython.utils.py3compat import getcwd
 
 
 def join_with_site_packages_dir(filename):
@@ -83,7 +80,7 @@ class PathMagic(Magics):
         if len(opts) > 1:
             self._error("%pypath: Only a single option allowed.")
 
-        action = '' if len(opts) == 0 else opts.keys()[0]
+        action = '' if len(opts) == 0 else list(opts.keys())[0]
 
         if action not in 'ad' and command_line_args:
             msg = "No arguments allowed for '%pypath -{}'."
@@ -97,7 +94,7 @@ class PathMagic(Magics):
     #--------------------------------------------------------------------------
 
     def _do_add_path(self, user_paths, command_line_args):
-        path = command_line_args or get_current_directory()
+        path = command_line_args or getcwd()
         path = os.path.abspath(path)
         if path in user_paths:
             self._error("{!r} is already in the user path.".format(path))
@@ -184,7 +181,7 @@ class PathMagic(Magics):
         elif len(path_arg):
             return path_arg
         else:
-            return get_current_directory()
+            return getcwd()
 
 
 def load_ipython_extension(ipython):
