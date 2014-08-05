@@ -79,8 +79,8 @@ To install from source::
 Dependencies
 ============
 
-* Python 2.7
-* IPython
+* Python 2.7/3.4 (older versions probably work, but this is not tested)
+* IPython >= 1.0
 
 
 License
