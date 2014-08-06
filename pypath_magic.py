@@ -17,7 +17,15 @@ from distutils.sysconfig import get_python_lib
 
 from IPython.core.error import UsageError
 from IPython.core.magic import Magics, magics_class, line_magic
-from IPython.utils.py3compat import getcwd
+
+
+def get_current_directory():
+    # When requirement is bumped up to IPython >= 2.0, use
+    # from IPython.utils.py3compat import getcwd
+    try:
+        return os.getcwdu()
+    except:
+        return os.getcwd()
 
 
 def join_with_site_packages_dir(filename):
@@ -94,7 +102,7 @@ class PathMagic(Magics):
     #--------------------------------------------------------------------------
 
     def _do_add_path(self, user_paths, command_line_args):
-        path = command_line_args or getcwd()
+        path = command_line_args or get_current_directory()
         path = os.path.abspath(path)
         if path in user_paths:
             self._error("{!r} is already in the user path.".format(path))
@@ -181,7 +189,7 @@ class PathMagic(Magics):
         elif len(path_arg):
             return path_arg
         else:
-            return getcwd()
+            return get_current_directory()
 
 
 def load_ipython_extension(ipython):

@@ -4,9 +4,9 @@ from contextlib import contextmanager
 
 from nose.tools import assert_equal, raises
 from IPython.core.error import UsageError
-from IPython.utils.py3compat import getcwd
 
-from pypath_magic import PathMagic, join_with_site_packages_dir
+from pypath_magic import (PathMagic, get_current_directory,
+                          join_with_site_packages_dir)
 
 
 #--------------------------------------------------------------------------
@@ -62,7 +62,7 @@ class TestablePathMagic(PathMagic):
 @contextmanager
 def cd(path):
     """Temporarily change directory."""
-    original_path = getcwd()
+    original_path = get_current_directory()
     try:
         os.chdir(path)
         yield
@@ -133,7 +133,7 @@ def test_print_pypath_file_path():
 def test_add_current_directory():
     with pypath_test_environment() as pypath:
         pypath('-a')
-        pypath.assert_paths_match([getcwd()])
+        pypath.assert_paths_match([get_current_directory()])
 
 
 def test_add_and_remove():
@@ -158,7 +158,7 @@ def test_add_multiple_directories():
 
 def test_add_absolute_path_input():
     with pypath_test_environment() as pypath:
-        current_directory = getcwd()
+        current_directory = get_current_directory()
         pypath('-a {}'.format(current_directory))
         pypath.assert_paths_match([current_directory])
 
