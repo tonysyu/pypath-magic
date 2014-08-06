@@ -2,20 +2,27 @@
 pypath-magic
 ============
 
+`Quick-start article <http://tonysyu.github.io/pypath-magic.html>`_
 
 ``pypath-magic`` adds an `IPython magic`_ (err... Jupyter_ magic?) command for
 easily manipulating your Python path. To use the magic command, just load the
-extension from an IPython session::
+extension from an IPython session:
+
+.. code-block:: python
 
    In [1]: %load_ext pypath_magic
 
-After loading, you will have access to the ``%pypath`` magic. You can type::
+After loading, you will have access to the ``%pypath`` magic. You can type:
+
+.. code-block:: python
 
    In [2]: %pypath
 
 to list all the custom paths added by ``pypath-magic``. When you get started,
 you won't have anything there. To add some custom paths, just change to
-a directory and call ``%pypath -a``::
+a directory and call ``%pypath -a``:
+
+.. code-block:: python
 
    In [3]: %cd path/to/my-repo
 
@@ -29,20 +36,26 @@ a directory and call ``%pypath -a``::
    In [6]: %pypath
    /absolute/path/to/my-repo
 
-Now you can reuse those helper functions::
+Now you can reuse those helper functions:
+
+.. code-block:: python
 
    In [7]: from plot_helpers import plot_slope_marker
 
 Changes to your python path will persist across IPython sessions, and those
 paths will be available outside of IPython. If you later want to delete
-a directory from your path, just use ``%pypath -d``::
+a directory from your path, just use ``%pypath -d``:
+
+.. code-block:: python
 
    In [8]: %cd path/to/my-repo
 
    In [9]: %pypath -d
    Deleted u'/absolute/path/to/my-repo' from path.
 
-You can also list your entire python path with ``%pypath -l``::
+You can also list your entire python path with ``%pypath -l``:
+
+.. code-block:: python
 
    In [10]: %pypath -l
 
@@ -57,7 +70,9 @@ You can also list your entire python path with ``%pypath -l``::
    ...
    /absolute/path/to/my-repo
 
-For additional usage information, type::
+For additional usage information, type:
+
+.. code-block:: python
 
    In [11]: %pypath?
 
@@ -75,12 +90,21 @@ To install from source::
    $ cd pypath-magic
    $ python setup.py install
 
+If you get an error like::
+
+   error: invalid command 'egg_info'
+
+you probably need to update ``setuptools``::
+
+   pip install --upgrade setuptools
+
 
 Dependencies
 ============
 
 * Python 2.7/3.4 (older versions probably work, but this is not tested)
-* IPython >= 1.0
+* IPython >= 1.1
+* setuptools >= 0.7
 
 
 License
