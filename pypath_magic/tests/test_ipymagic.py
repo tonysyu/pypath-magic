@@ -5,8 +5,9 @@ from contextlib import contextmanager
 from nose.tools import assert_equal, raises
 from IPython.core.error import UsageError
 
-from pypath_magic.ipymagic import (PathMagic, get_current_directory,
-                                   join_with_site_packages_dir)
+from pypath_magic.core import (get_current_directory,
+                               join_with_site_packages_dir)
+from pypath_magic.ipymagic import IPyPath, PathMagic
 
 
 # -------------------------------------------------------------------------
@@ -17,23 +18,34 @@ from pypath_magic.ipymagic import (PathMagic, get_current_directory,
 MOCK_PATH_FILE = '_pypath_test_path_.pth'
 
 
+class TestablePyPath(IPyPath):
+
+    def __init__(self, *args, **kwargs):
+        super(IPyPath, self).__init__(*args, **kwargs)
+        self.path_file = join_with_site_packages_dir(MOCK_PATH_FILE)
+        self.output = []
+
+    def _print(self, line):
+        """Override write method to save lines instead of printing."""
+        self.output.append(line)
+
+
 class TestablePathMagic(PathMagic):
 
     def __init__(self, *args, **kwargs):
         super(TestablePathMagic, self).__init__(*args, **kwargs)
-        self._output = []
-        self.path_file = join_with_site_packages_dir(MOCK_PATH_FILE)
+        self._pypath_cmd = TestablePyPath()
 
     def __call__(self, *args, **kwargs):
         self.pypath(*args, **kwargs)
 
-    def _print(self, line):
-        """Override write method to save lines instead of printing."""
-        self._output.append(line)
+    @property
+    def path_file(self):
+        return self._pypath_cmd.path_file
 
     @property
     def output_buffer(self):
-        return '\n'.join(self._output)
+        return '\n'.join(self._pypath_cmd.output)
 
     @property
     def output_lines(self):
@@ -46,7 +58,7 @@ class TestablePathMagic(PathMagic):
     @property
     def current_custom_paths(self):
         self('')  # Calling `pypath` with no arguments lists custom paths.
-        lines = self._output.pop()
+        lines = self._pypath_cmd.output.pop()
         if len(lines.strip()):
             # One path on each line, a space separates the index from path.
             return [each.split()[1] for each in lines.split('\n')]
@@ -106,9 +118,9 @@ def pypath_test_environment(user_paths=()):
             os.remove(pypath.path_file)
 
 
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #  Tests
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 def test_empty():
     with pypath_test_environment() as pypath:
@@ -127,6 +139,8 @@ def test_list_all_paths():
 def test_print_pypath_file_path():
     with pypath_test_environment() as pypath:
         pypath('-p')
+        print pypath.last_output[-len(MOCK_PATH_FILE):], MOCK_PATH_FILE
+        print pypath.last_output, MOCK_PATH_FILE
         assert pypath.last_output.endswith(MOCK_PATH_FILE)
 
 
@@ -143,9 +157,9 @@ def test_add_and_remove():
         assert_equal(len(pypath.current_custom_paths), 0)
 
 
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #  Test `%pypath -a`
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 def test_add_multiple_directories():
     with pypath_test_environment() as pypath:
@@ -176,9 +190,9 @@ def test_add_nonexistent_path():
         pypath('-a path/that/does/not/exist')
 
 
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #  Test `%pypath -d'
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 def test_delete_index():
     user_paths = ['a/b/c', 'd/e/f', 'g/h', 'i/j']
