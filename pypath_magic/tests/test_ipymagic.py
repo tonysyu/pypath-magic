@@ -5,13 +5,13 @@ from contextlib import contextmanager
 from nose.tools import assert_equal, raises
 from IPython.core.error import UsageError
 
-from pypath_magic import (PathMagic, get_current_directory,
-                          join_with_site_packages_dir)
+from pypath_magic.ipymagic import (PathMagic, get_current_directory,
+                                   join_with_site_packages_dir)
 
 
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 #  Test helpers
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 
 MOCK_PATH_FILE = '_pypath_test_path_.pth'

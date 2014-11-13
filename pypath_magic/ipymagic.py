@@ -64,9 +64,9 @@ class PathMagic(Magics):
                               'l': self._do_list_all_paths,
                               'p': self._do_print_path_file}
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Public interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     @line_magic('pypath')
     def pypath(self, line):
@@ -97,9 +97,9 @@ class PathMagic(Magics):
         user_paths = self._load_user_paths()
         self._action_calls[action](user_paths, command_line_args)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Action interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _do_add_path(self, user_paths, command_line_args):
         path = command_line_args or get_current_directory()
@@ -116,7 +116,7 @@ class PathMagic(Magics):
     def _do_delete_path(self, user_paths, command_line_args):
         path = self._parse_path_argument(user_paths, command_line_args)
         path = os.path.abspath(path)
-        if not path in user_paths:
+        if path not in user_paths:
             msg = "{!r} is not in the user path. Cannot delete."
             self._error(msg.format(path))
 
@@ -134,9 +134,9 @@ class PathMagic(Magics):
     def _do_print_path_file(self, user_paths, command_line_args):
         self._print(self.path_file)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     #  Private interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _print(self, line):
         print(line)
