@@ -87,27 +87,26 @@ class PathMagic(Magics):
             msg = "No arguments allowed for '%pypath -{}'."
             raise UsageError(msg.format(action))
 
-        user_paths = self._pypath_cmd.load_user_paths()
-        self._action_calls[action](user_paths, command_line_args)
+        self._action_calls[action](command_line_args)
 
     # -------------------------------------------------------------------------
     #  Action interface
     # -------------------------------------------------------------------------
 
-    def _do_add_path(self, user_paths, command_line_args):
-        self._pypath_cmd.add_path(user_paths, command_line_args)
+    def _do_add_path(self, command_line_args):
+        self._pypath_cmd.add_path(command_line_args)
 
-    def _do_delete_path(self, user_paths, command_line_args):
-        self._pypath_cmd.delete_path(user_paths, command_line_args)
+    def _do_delete_path(self, command_line_args):
+        self._pypath_cmd.delete_path(command_line_args)
 
-    def _do_list_all_paths(self, user_paths, command_line_args):
-        self._pypath_cmd.list_all_paths(user_paths, command_line_args)
+    def _do_list_all_paths(self, command_line_args):
+        self._pypath_cmd.list_all_paths()
 
-    def _do_list_custom_paths(self, user_paths, command_line_args):
-        self._pypath_cmd.list_custom_paths(user_paths, command_line_args)
+    def _do_list_custom_paths(self, command_line_args):
+        self._pypath_cmd.list_custom_paths()
 
-    def _do_print_path_file(self, user_paths, command_line_args):
-        self._pypath_cmd.print_path_file(user_paths, command_line_args)
+    def _do_print_path_file(self, command_line_args):
+        self._pypath_cmd.print_path_file()
 
     # -------------------------------------------------------------------------
     #  Private interface
