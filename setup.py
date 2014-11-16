@@ -28,6 +28,7 @@ setup_kwargs = {
     ],
     'keywords': ['PYTHONPATH', 'utility', 'IPython'],
     'install_requires': ['IPython >= 1.0'],
+    'entry_points': {'console_scripts': ['pypath = pypath_magic.cli:main']},
 }
 
 
