@@ -5,23 +5,38 @@ PyPath command-line interface for manipulating the Python path.
 
 """
 import argparse
+import textwrap
+from itertools import chain
 
 from .core import PyPath
 
 
-def get_command_line_args():
-    formatter = argparse.ArgumentDefaultsHelpFormatter
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=formatter)
-    parser.add_argument('-a', '--add-path', nargs='?', const='',
-                        help="Add path to Python path.")
-    parser.add_argument('-d', '--delete-path', nargs='?', const='',
-                        help="Delete path from user path.")
-    parser.add_argument('-l', '--list-all-paths', action='store_true',
-                        help="List all paths in Python path.")
-    parser.add_argument('-p', '--print-path-file', action='store_true',
-                        help="Print path to user's path file.")
+def wrap_text(text, width):
+    return textwrap.wrap(text, width, subsequent_indent='    ')
 
+
+class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter):
+
+    def _split_lines(self, text, width):
+        # Override `_split_lines` to preserve new-lines in help-text
+        lines = text.split('\n')
+        lines = chain.from_iterable(wrap_text(text, width) for text in lines)
+        return list(lines)
+
+
+def get_command_line_args():
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=CustomFormatter)
+    parser.add_argument('action', nargs='?', default='list',
+                        choices=['add', 'delete', 'del', 'list', 'list-all',
+                                 'path-file'],
+                        help="add: Add path to Python path.\n\n"
+                             "delete, del: Delete path from user path.\n\n"
+                             "list: List user paths managed by pypath.\n\n"
+                             "list-all: List all paths in Python path.\n\n"
+                             "path-file: Print path to user's path file.")
+    parser.add_argument('path', nargs='?', default='.',
+                        help="Path to add or delete.")
     return parser.parse_args()
 
 
@@ -29,16 +44,16 @@ def main():
     args = get_command_line_args()
     pypath_cmd = PyPath()
 
-    if args.add_path is not None:
-        pypath_cmd.add_path(args.add_path)
-    elif args.delete_path is not None:
-        pypath_cmd.delete_path(args.delete_path)
-    elif args.list_all_paths:
-        pypath_cmd.list_all_paths()
-    elif args.print_path_file:
-        pypath_cmd.print_path_file()
-    else:
-        pypath_cmd.list_custom_paths()
+    actions = {
+        'add': pypath_cmd.add_path,
+        'delete': pypath_cmd.delete_path,
+        'del': pypath_cmd.delete_path,
+        'list': pypath_cmd.list_custom_paths,
+        'list-all': pypath_cmd.list_all_paths,
+        'path-file': pypath_cmd.print_path_file
+    }
+    command = actions[args.action]
+    command(args.path)
 
 
 if __name__ == '__main__':

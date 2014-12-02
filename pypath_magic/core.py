@@ -71,15 +71,15 @@ class PyPath(object):
         save_lines(self.path_file, user_paths)
         self._print('Deleted {!r} from path'.format(path))
 
-    def list_all_paths(self):
+    def list_all_paths(self, _=None):
         self._print_lines(sys.path)
 
-    def list_custom_paths(self):
+    def list_custom_paths(self, _=None):
         user_paths = self._load_user_paths()
         self._print_lines([self._numbered_format(index=i, path=path)
                           for i, path in enumerate(user_paths)])
 
-    def print_path_file(self):
+    def print_path_file(self, _=None):
         self._print(self.path_file)
 
     def _load_user_paths(self):
