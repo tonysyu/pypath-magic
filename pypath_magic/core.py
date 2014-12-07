@@ -9,9 +9,16 @@ import sys
 from distutils.sysconfig import get_python_lib
 
 
+ACTION_DOCSTRINGS = {
+    'list': "List all paths defined by user.",
+    'add': "Add path to user's Python path.",
+    'delete': "Delete path from user's Python path.",
+    'list_all': "List all paths in user's Python path.",
+    'path_file': "Print path to user's path file.",
+}
+
+
 def get_current_directory():
-    # When requirement is bumped up to IPython >= 2.0, use
-    # from IPython.utils.py3compat import getcwd
     try:
         return os.getcwdu()
     except:
@@ -41,6 +48,7 @@ class PyPath(object):
 
         filename = os.environ.get('PYPATH_FILENAME', 'pypath_magic.pth')
         self.path_file = join_with_site_packages_dir(filename)
+        self._help_command = 'pypath -h'
 
     # -------------------------------------------------------------------------
     #  Public interface
@@ -76,16 +84,14 @@ class PyPath(object):
 
     def list_custom_paths(self, _=None):
         user_paths = self._load_user_paths()
-        self._print_lines([self._numbered_format(index=i, path=path)
-                          for i, path in enumerate(user_paths)])
+        if user_paths:
+            self._print_lines([self._numbered_format(index=i, path=path)
+                               for i, path in enumerate(user_paths)])
+        else:
+            self._print_empty_list_message()
 
     def print_path_file(self, _=None):
         self._print(self.path_file)
-
-    def _load_user_paths(self):
-        with open(self.path_file, 'r') as f:
-            user_paths = f.readlines()
-        return [p.strip() for p in user_paths if p.strip()]
 
     # -------------------------------------------------------------------------
     #  Private interface
@@ -97,11 +103,21 @@ class PyPath(object):
     def _print_lines(self, lines):
         self._print('\n'.join(lines))
 
+    def _print_empty_list_message(self):
+        msg = ("No user paths are defined.\n"
+                "See `{help_command}` for usage information.")
+        self._print(msg.format(help_command=self._help_command))
+
     def _error(self, message):
         raise RuntimeError(message)
 
     def _numbered_format(self, **kwargs):
         return '{index}. {path}'.format(**kwargs)
+
+    def _load_user_paths(self):
+        with open(self.path_file, 'r') as f:
+            user_paths = f.readlines()
+        return [p.strip() for p in user_paths if p.strip()]
 
     @staticmethod
     def _add_path(path, user_paths):

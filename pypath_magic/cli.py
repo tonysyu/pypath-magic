@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-PyPath command-line interface for manipulating the Python path.
+PyPath command-line interface for manipulating a user's Python path.
 
 
 """
@@ -8,7 +8,16 @@ import argparse
 import textwrap
 from itertools import chain
 
-from .core import PyPath
+from .core import ACTION_DOCSTRINGS, PyPath
+
+
+ACTION_HELP = """\
+add: {add}
+delete, del: {delete}
+list: {list}
+list-all: {list_all}
+path-file: {path_file}
+""".format(**ACTION_DOCSTRINGS)
 
 
 def wrap_text(text, width):
@@ -27,14 +36,9 @@ class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter):
 def get_command_line_args():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=CustomFormatter)
-    parser.add_argument('action', nargs='?', default='list',
+    parser.add_argument('action', nargs='?', default='list', help=ACTION_HELP,
                         choices=['add', 'delete', 'del', 'list', 'list-all',
-                                 'path-file'],
-                        help="add: Add path to Python path.\n\n"
-                             "delete, del: Delete path from user path.\n\n"
-                             "list: List user paths managed by pypath.\n\n"
-                             "list-all: List all paths in Python path.\n\n"
-                             "path-file: Print path to user's path file.")
+                                 'path-file'])
     parser.add_argument('path', nargs='?', default='.',
                         help="Path to add or delete.")
     return parser.parse_args()

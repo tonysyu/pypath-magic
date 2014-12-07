@@ -17,7 +17,21 @@ import sys
 from IPython.core.error import UsageError
 from IPython.core.magic import Magics, magics_class, line_magic
 
-from .core import PyPath
+from .core import ACTION_DOCSTRINGS, PyPath
+
+
+PYPATH_HELP = """\
+PyPath magic for manipulating a user's Python path.
+
+%pypath              - {list}
+%pypath -a           - {add}
+%pypath -d           - {delete}
+%pypath -l           - {list_all}
+%pypath -p           - {path_file}
+
+The added paths persist through sessions and are stored separately
+from paths added by setuptools/pip (see `%pypath -p`).
+""".format(**ACTION_DOCSTRINGS)
 
 
 def touch_file(path):
@@ -26,6 +40,10 @@ def touch_file(path):
 
 
 class IPyPath(PyPath):
+
+    def __init__(self, *args, **kwargs):
+        super(IPyPath, self).__init__(*args, **kwargs)
+        self._help_command = '%pypath?'
 
     @staticmethod
     def _add_path(path, user_paths):
@@ -63,17 +81,6 @@ class PathMagic(Magics):
 
     @line_magic('pypath')
     def pypath(self, line):
-        """Manage user's Python path.
-
-        %pypath              - List all paths defined by user.
-        %pypath -a           - Add current path to user path.
-        %pypath -d           - Delete current path from user path.
-        %pypath -l           - List all paths (including pre-defined paths).
-        %pypath -p           - Print path to user's path file.
-
-        The added paths persist through sessions and are stored separately
-        from paths added by setuptools/pip (see `%pypath -p`).
-        """
         if not os.path.isfile(self._pypath_cmd.path_file):
             touch_file(self._pypath_cmd.path_file)
 
@@ -88,6 +95,9 @@ class PathMagic(Magics):
             raise UsageError(msg.format(action))
 
         self._action_calls[action](command_line_args)
+
+    # Patch docstring since we can't use `str.format` with docstrings.
+    pypath.__doc__ = PYPATH_HELP
 
     # -------------------------------------------------------------------------
     #  Action interface

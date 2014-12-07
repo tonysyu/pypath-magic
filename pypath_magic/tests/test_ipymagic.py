@@ -29,6 +29,10 @@ class TestablePyPath(IPyPath):
         """Override write method to save lines instead of printing."""
         self.output.append(line)
 
+    def _print_empty_list_message(self):
+        # Override empty-list message so that nothing is printed.
+        pass
+
 
 class TestablePathMagic(PathMagic):
 
