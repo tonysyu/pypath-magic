@@ -30,8 +30,7 @@ class TestablePyPath(IPyPath):
         self.output.append(line)
 
     def _print_empty_list_message(self):
-        # Override empty-list message so that nothing is printed.
-        pass
+        self._print('')
 
 
 class TestablePathMagic(PathMagic):

@@ -105,7 +105,7 @@ class PyPath(object):
 
     def _print_empty_list_message(self):
         msg = ("No user paths are defined.\n"
-                "See `{help_command}` for usage information.")
+               "See `{help_command}` for usage information.")
         self._print(msg.format(help_command=self._help_command))
 
     def _error(self, message):
