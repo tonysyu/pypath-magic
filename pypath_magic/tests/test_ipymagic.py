@@ -142,8 +142,6 @@ def test_list_all_paths():
 def test_print_pypath_file_path():
     with pypath_test_environment() as pypath:
         pypath('-p')
-        print pypath.last_output[-len(MOCK_PATH_FILE):], MOCK_PATH_FILE
-        print pypath.last_output, MOCK_PATH_FILE
         assert pypath.last_output.endswith(MOCK_PATH_FILE)
 
 
