@@ -2,10 +2,11 @@ import sys
 
 from nose.tools import assert_equal, raises
 
-from pypath_magic.core import get_current_directory
+from pypath_magic.utils import get_current_directory
 from pypath_magic.testing import (MOCK_PATH_FILE,
                                   cd_temp_directory, make_temp_dirs,
                                   pypath_test_environment)
+
 
 # -------------------------------------------------------------------------
 #  Basic tests

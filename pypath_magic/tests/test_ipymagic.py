@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from nose.tools import assert_equal, raises
 from IPython.core.error import UsageError
 
-from pypath_magic.core import get_current_directory
+from pypath_magic.utils import get_current_directory
 from pypath_magic.ipymagic import PathMagic
 from pypath_magic.testing import (MOCK_PATH_FILE, TestablePyPath,
                                   cd_temp_directory, make_temp_dirs)

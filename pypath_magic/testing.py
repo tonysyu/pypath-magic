@@ -3,8 +3,8 @@ from contextlib import contextmanager
 
 from nose.tools import assert_equal
 
-from pypath_magic.core import (PyPath, get_current_directory,
-                               join_with_site_packages_dir)
+from .core import PyPath, join_with_site_packages_dir
+from .utils import touch_file, get_current_directory
 
 
 MOCK_PATH_FILE = '_pypath_test_path_.pth'
@@ -35,11 +35,6 @@ class TestablePyPath(PyPath):
 
     def _print_empty_list_message(self):
         self._print('')
-
-
-def touch_file(path):
-    with open(path, 'w'):  # Write empty file.
-        pass
 
 
 @contextmanager
