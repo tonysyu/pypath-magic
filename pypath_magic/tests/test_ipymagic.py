@@ -21,7 +21,7 @@ MOCK_PATH_FILE = '_pypath_test_path_.pth'
 class TestablePyPath(IPyPath):
 
     def __init__(self, *args, **kwargs):
-        super(IPyPath, self).__init__(*args, **kwargs)
+        super(TestablePyPath, self).__init__(*args, **kwargs)
         self.path_file = join_with_site_packages_dir(MOCK_PATH_FILE)
         self.output = []
 
