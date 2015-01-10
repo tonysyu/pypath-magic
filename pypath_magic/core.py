@@ -67,7 +67,7 @@ class PyPath(object):
         save_lines(self.path_file, user_paths)
         self._print('Added {!r} to path.'.format(path))
 
-    def delete_path(self, path):
+    def delete_path(self, path=''):
         user_paths = self._load_user_paths()
         path = self._parse_path_argument(user_paths, path)
         path = os.path.abspath(path)

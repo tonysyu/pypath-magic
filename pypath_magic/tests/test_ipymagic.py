@@ -5,39 +5,27 @@ from contextlib import contextmanager
 from nose.tools import assert_equal, raises
 from IPython.core.error import UsageError
 
-from pypath_magic.core import (get_current_directory,
-                               join_with_site_packages_dir)
-from pypath_magic.ipymagic import IPyPath, PathMagic
+from pypath_magic.core import get_current_directory
+from pypath_magic.ipymagic import PathMagic
+from pypath_magic.testing import (MOCK_PATH_FILE, TestablePyPath,
+                                  cd_temp_directory, make_temp_dirs)
 
 
 # -------------------------------------------------------------------------
 #  Test helpers
 # -------------------------------------------------------------------------
 
+class TestableIPyPath(TestablePyPath):
 
-MOCK_PATH_FILE = '_pypath_test_path_.pth'
-
-
-class TestablePyPath(IPyPath):
-
-    def __init__(self, *args, **kwargs):
-        super(TestablePyPath, self).__init__(*args, **kwargs)
-        self.path_file = join_with_site_packages_dir(MOCK_PATH_FILE)
-        self.output = []
-
-    def _print(self, line):
-        """Override write method to save lines instead of printing."""
-        self.output.append(line)
-
-    def _print_empty_list_message(self):
-        self._print('')
+    def _error(self, message):
+        raise UsageError(message)
 
 
 class TestablePathMagic(PathMagic):
 
     def __init__(self, *args, **kwargs):
         super(TestablePathMagic, self).__init__(*args, **kwargs)
-        self._pypath_cmd = TestablePyPath()
+        self._pypath_cmd = TestableIPyPath()
 
     def __call__(self, *args, **kwargs):
         self.pypath(*args, **kwargs)
@@ -72,39 +60,6 @@ class TestablePathMagic(PathMagic):
         assert_equal(len(self.current_custom_paths), len(paths))
         absolute_paths = [os.path.abspath(p) for p in paths]
         assert_equal(self.current_custom_paths, absolute_paths)
-
-
-@contextmanager
-def cd(path):
-    """Temporarily change directory."""
-    original_path = get_current_directory()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(original_path)
-
-
-@contextmanager
-def make_temp_dirs(paths):
-    """Temporarily add directory."""
-    # Copy list to ensure that modifications don't affect removal
-    paths = list(paths)
-    for p in paths:
-        os.makedirs(p)
-    try:
-        yield
-    finally:
-        for p in paths:
-            if os.path.isdir(p):
-                os.removedirs(p)
-
-
-@contextmanager
-def cd_temp_directory(path):
-    with make_temp_dirs([path]):
-        with cd(path):
-            yield
 
 
 @contextmanager

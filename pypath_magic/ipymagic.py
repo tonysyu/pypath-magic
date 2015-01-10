@@ -18,6 +18,7 @@ from IPython.core.error import UsageError
 from IPython.core.magic import Magics, magics_class, line_magic
 
 from .core import ACTION_DOCSTRINGS, PyPath
+from .utils import touch_file
 
 
 PYPATH_HELP = """\
@@ -32,11 +33,6 @@ PyPath magic for manipulating a user's Python path.
 The added paths persist through sessions and are stored separately
 from paths added by setuptools/pip (see `%pypath -p`).
 """.format(**ACTION_DOCSTRINGS)
-
-
-def touch_file(path):
-    with open(path, 'w'):  # Write empty file.
-        pass
 
 
 class IPyPath(PyPath):
