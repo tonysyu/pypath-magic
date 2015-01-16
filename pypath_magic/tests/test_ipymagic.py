@@ -2,11 +2,11 @@ import os
 import sys
 from contextlib import contextmanager
 
-from nose.tools import assert_equal, raises
+from nose.tools import assert_equal, assert_in, assert_not_in, raises
 from IPython.core.error import UsageError
 
 from pypath_magic.utils import get_current_directory
-from pypath_magic.ipymagic import PathMagic
+from pypath_magic.ipymagic import IPyPath, PathMagic
 from pypath_magic.testing import (MOCK_PATH_FILE, TestablePyPath,
                                   cd_temp_directory, make_temp_dirs)
 
@@ -15,10 +15,9 @@ from pypath_magic.testing import (MOCK_PATH_FILE, TestablePyPath,
 #  Test helpers
 # -------------------------------------------------------------------------
 
-class TestableIPyPath(TestablePyPath):
+class TestableIPyPath(TestablePyPath, IPyPath):
 
-    def _error(self, message):
-        raise UsageError(message)
+    pass
 
 
 class TestablePathMagic(PathMagic):
@@ -103,14 +102,21 @@ def test_print_pypath_file_path():
 def test_add_current_directory():
     with pypath_test_environment() as pypath:
         pypath('-a')
-        pypath.assert_paths_match([get_current_directory()])
+        current_path = get_current_directory()
+        pypath.assert_paths_match([current_path])
+        assert_in(current_path, sys.path)
 
 
 def test_add_and_remove():
-    with pypath_test_environment() as pypath:
-        pypath('-a')
-        pypath('-d')
-        assert_equal(len(pypath.current_custom_paths), 0)
+    with cd_temp_directory('_dummy_'):
+        with pypath_test_environment() as pypath:
+            current_path = get_current_directory()
+            pypath('-a')
+            assert_in(current_path, sys.path)
+
+            pypath('-d')
+            assert_equal(len(pypath.current_custom_paths), 0)
+            assert_not_in(current_path, sys.path)
 
 
 # -------------------------------------------------------------------------
