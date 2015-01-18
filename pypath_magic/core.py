@@ -23,14 +23,16 @@ ACTION_DOCSTRINGS = {
 class PyPath(object):
 
     def __init__(self, *args, **kwargs):
-        super(PyPath, self).__init__(*args, **kwargs)
-
+        # Default pypath filename can be overridden by environment variable
+        # or keyword argument---in that order.
         filename = os.environ.get('PYPATH_FILENAME', 'pypath_magic.pth')
+        filename = kwargs.get('pypath_filename', filename)
         self.path_file = join_with_site_packages_dir(filename)
-        self._help_command = 'pypath -h'
 
         if not os.path.isfile(self.path_file):
             touch_file(self.path_file)
+
+        self._help_command = 'pypath -h'
 
     # -------------------------------------------------------------------------
     #  Public interface
