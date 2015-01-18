@@ -8,7 +8,7 @@ import os
 import sys
 
 from .utils import (get_current_directory, is_integer,
-                    join_with_site_packages_dir, save_lines)
+                    join_with_site_packages_dir, save_lines, touch_file)
 
 
 ACTION_DOCSTRINGS = {
@@ -28,6 +28,9 @@ class PyPath(object):
         filename = os.environ.get('PYPATH_FILENAME', 'pypath_magic.pth')
         self.path_file = join_with_site_packages_dir(filename)
         self._help_command = 'pypath -h'
+
+        if not os.path.isfile(self.path_file):
+            touch_file(self.path_file)
 
     # -------------------------------------------------------------------------
     #  Public interface

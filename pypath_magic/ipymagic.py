@@ -77,9 +77,6 @@ class PathMagic(Magics):
 
     @line_magic('pypath')
     def pypath(self, line):
-        if not os.path.isfile(self._pypath_cmd.path_file):
-            touch_file(self._pypath_cmd.path_file)
-
         opts, command_line_args = self.parse_options(line, 'adlp')
         if len(opts) > 1:
             self._error("%pypath: Only a single option allowed.")
