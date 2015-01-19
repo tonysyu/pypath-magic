@@ -11,14 +11,12 @@ information, type
 """
 from __future__ import print_function
 
-import os
 import sys
 
 from IPython.core.error import UsageError
 from IPython.core.magic import Magics, magics_class, line_magic
 
 from .core import ACTION_DOCSTRINGS, PyPath
-from .utils import touch_file
 
 
 PYPATH_HELP = """\
