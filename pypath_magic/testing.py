@@ -2,7 +2,7 @@ import os
 import sys
 from contextlib import contextmanager
 
-from nose.tools import assert_equal, raises
+from nose.tools import assert_equal, assert_raises, raises
 
 from .core import PyPath
 from .utils import get_current_directory
@@ -18,10 +18,6 @@ class TestablePyPath(PyPath):
         super(TestablePyPath, self).__init__(*args, **kwargs)
         self.output = []
 
-    def assert_paths_match(self, paths):
-        absolute_paths = [os.path.abspath(p) for p in paths]
-        assert_equal(self.current_custom_paths, absolute_paths)
-
     @property
     def current_custom_paths(self):
         return self._load_user_paths()
@@ -36,6 +32,11 @@ class TestablePyPath(PyPath):
 
     def _print_empty_list_message(self):
         self._print('')
+
+
+def assert_paths_match(pypath, paths):
+    absolute_paths = [os.path.abspath(p) for p in paths]
+    assert_equal(pypath.current_custom_paths, absolute_paths)
 
 
 @contextmanager
@@ -71,35 +72,12 @@ def cd_temp_directory(path):
             yield
 
 
-@contextmanager
-def pypath_test_environment(user_paths=()):
-    user_paths = list(user_paths)
-    pypath = TestablePyPath()
-    try:
-        with make_temp_dirs(user_paths):
-            for p in user_paths:
-                pypath.add_path(p)
-            yield pypath
-    finally:
-        if os.path.isfile(pypath.path_file):
-            os.remove(pypath.path_file)
-
-
 # -------------------------------------------------------------------------
 #  Test runners
 # -------------------------------------------------------------------------
 
-class PyPathTestingBase(object):
 
-    def setup(self):
-        self.pypath = TestablePyPath(pypath_filename=MOCK_PATH_FILE)
-
-    def teardown(self):
-        if os.path.isfile(self.pypath.path_file):
-            os.remove(self.pypath.path_file)
-
-
-class BasicPyPathInterface(PyPathTestingBase):
+class BasicPyPathInterface(object):
 
     def test_empty(self):
         self.pypath.list_custom_paths()
@@ -117,39 +95,44 @@ class BasicPyPathInterface(PyPathTestingBase):
 
     def test_add_current_directory(self):
         self.pypath.add_path()
-        self.pypath.assert_paths_match([get_current_directory()])
+        assert_paths_match(self.pypath, [get_current_directory()])
 
     def test_add_and_remove(self):
-        self.pypath.add_path()
-        self.pypath.delete_path()
-        assert_equal(len(self.pypath.current_custom_paths), 0)
+        with cd_temp_directory('_dummy_'):
+            self.pypath.add_path()
+            self.pypath.delete_path()
+            assert_equal(len(self.pypath.current_custom_paths), 0)
 
 
-class PyPathAddInterface(PyPathTestingBase):
+class PyPathAddInterface(object):
+
+    error_class = RuntimeError
 
     def test_add_multiple_directories(self):
         self.pypath.add_path()
         with cd_temp_directory('_dummy_'):
             self.pypath.add_path()
         assert_equal(len(self.pypath.current_custom_paths), 2)
-        self.pypath.assert_paths_match(['.', '_dummy_'])
+        assert_paths_match(self.pypath, ['.', '_dummy_'])
 
     def test_add_absolute_path_input(self):
         current_directory = get_current_directory()
         self.pypath.add_path(current_directory)
-        self.pypath.assert_paths_match([current_directory])
+        assert_paths_match(self.pypath, [current_directory])
 
     def test_add_relative_path_input(self):
         with make_temp_dirs(['./_dummy_']):
             self.pypath.add_path('_dummy_')
-            self.pypath.assert_paths_match(['_dummy_'])
+            assert_paths_match(self.pypath, ['_dummy_'])
 
-    @raises(RuntimeError)
     def test_add_nonexistent_path(self):
-        self.pypath.add_path('path/that/does/not/exist')
+        with assert_raises(self.error_class):
+            self.pypath.add_path('path/that/does/not/exist')
 
 
-class PyPathDeleteInterface(PyPathTestingBase):
+class PyPathDeleteInterface(object):
+
+    error_class = RuntimeError
 
     def init_user_paths(self, user_paths):
         with make_temp_dirs(user_paths):
@@ -162,7 +145,7 @@ class PyPathDeleteInterface(PyPathTestingBase):
 
         self.pypath.delete_path('1')
         user_paths.pop(1)
-        self.pypath.assert_paths_match(user_paths)
+        assert_paths_match(self.pypath, user_paths)
 
     def test_delete_relative_path(self):
         user_paths = ['a/b/c', 'd/e/f', 'g/h', 'i/j']
@@ -170,12 +153,12 @@ class PyPathDeleteInterface(PyPathTestingBase):
 
         self.pypath.delete_path('d/e/f')
         user_paths.pop(1)
-        self.pypath.assert_paths_match(user_paths)
+        assert_paths_match(self.pypath, user_paths)
 
-    @raises(RuntimeError)
     def test_delete_nonexistent_path(self):
-        self.pypath.delete_path('path/that/does/not/exist')
+        with assert_raises(self.error_class):
+            self.pypath.delete_path('path/that/does/not/exist')
 
-    @raises(RuntimeError)
     def test_delete_nonexistent_index(self):
-        self.pypath.delete_path('1')
+        with assert_raises(self.error_class):
+            self.pypath.delete_path('1')

@@ -60,9 +60,12 @@ class IPyPath(PyPath):
 class PathMagic(Magics):
 
     def __init__(self, *args, **kwargs):
+        fname = kwargs.pop('pypath_filename', None)
+        pypath_kwargs = ({} if fname is None else {'pypath_filename': fname})
+        self._pypath_cmd = IPyPath(**pypath_kwargs)
+
         super(PathMagic, self).__init__(*args, **kwargs)
 
-        self._pypath_cmd = IPyPath()
         self._action_calls = {'': self._do_list_custom_paths,
                               'a': self._do_add_path,
                               'd': self._do_delete_path,
