@@ -94,8 +94,9 @@ class BasicPyPathInterface(object):
         assert self.pypath.output[-1].endswith(MOCK_PATH_FILE)
 
     def test_add_current_directory(self):
-        self.pypath.add_path()
-        assert_paths_match(self.pypath, [get_current_directory()])
+        with cd_temp_directory('_dummy_'):
+            self.pypath.add_path()
+            assert_paths_match(self.pypath, [get_current_directory()])
 
     def test_add_and_remove(self):
         with cd_temp_directory('_dummy_'):

@@ -1,16 +1,14 @@
 import os
 import sys
 
-from nose.tools import assert_equal, assert_in, assert_not_in
+from nose.tools import assert_in, assert_not_in
 from IPython.core.error import UsageError
 
 from pypath_magic.utils import get_current_directory
 from pypath_magic.ipymagic import IPyPath, PathMagic
-from pypath_magic.testing import (
-    MOCK_PATH_FILE, BasicPyPathInterface, PyPathAddInterface,
-    PyPathDeleteInterface, TestablePyPath, assert_paths_match,
-    cd_temp_directory
-)
+from pypath_magic.testing import (MOCK_PATH_FILE, BasicPyPathInterface,
+                                  PyPathAddInterface, PyPathDeleteInterface,
+                                  TestablePyPath, cd_temp_directory)
 
 
 class TestableIPyPath(TestablePyPath, IPyPath):
@@ -70,19 +68,17 @@ class TestHarness(object):
 
 class TestBasicPyPathInterface(TestHarness, BasicPyPathInterface):
 
-    def test_add_current_directory(self):
-        # Override parent test to assert active sys.path is updated.
-        self.pypath.add_path()
-        current_path = get_current_directory()
-        assert_paths_match(self.pypath, [current_path])
-        assert_in(current_path, sys.path)
+    def test_add_current_directory_changes_sys_path(self):
+        # The PyPath magic command should alter the active sys.path.
+        with cd_temp_directory('_dummy_'):
+            self.pypath.add_path()
+            assert_in(get_current_directory(), sys.path)
 
-    def test_add_and_remove(self):
-        # Override parent test to assert active sys.path is updated.
+    def test_add_and_remove_changes_sys_path(self):
+        # The PyPath magic command should alter the active sys.path.
         with cd_temp_directory('_dummy_'):
             self.pypath.add_path()
             self.pypath.delete_path()
-            assert_equal(len(self.pypath.current_custom_paths), 0)
             assert_not_in(get_current_directory(), sys.path)
 
 
