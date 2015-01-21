@@ -11,14 +11,12 @@ information, type
 """
 from __future__ import print_function
 
-import os
 import sys
 
 from IPython.core.error import UsageError
 from IPython.core.magic import Magics, magics_class, line_magic
 
 from .core import ACTION_DOCSTRINGS, PyPath
-from .utils import touch_file
 
 
 PYPATH_HELP = """\
@@ -62,9 +60,12 @@ class IPyPath(PyPath):
 class PathMagic(Magics):
 
     def __init__(self, *args, **kwargs):
+        fname = kwargs.pop('pypath_filename', None)
+        pypath_kwargs = ({} if fname is None else {'pypath_filename': fname})
+        self._pypath_cmd = IPyPath(**pypath_kwargs)
+
         super(PathMagic, self).__init__(*args, **kwargs)
 
-        self._pypath_cmd = IPyPath()
         self._action_calls = {'': self._do_list_custom_paths,
                               'a': self._do_add_path,
                               'd': self._do_delete_path,
@@ -77,9 +78,6 @@ class PathMagic(Magics):
 
     @line_magic('pypath')
     def pypath(self, line):
-        if not os.path.isfile(self._pypath_cmd.path_file):
-            touch_file(self._pypath_cmd.path_file)
-
         opts, command_line_args = self.parse_options(line, 'adlp')
         if len(opts) > 1:
             self._error("%pypath: Only a single option allowed.")
