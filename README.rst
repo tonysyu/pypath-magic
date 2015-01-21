@@ -2,7 +2,46 @@
 pypath-magic
 ============
 
-`Quick-start article <http://tonysyu.github.io/pypath-magic.html>`_
+
+``pypath-magic`` provides a simple interface for adding modules and packages
+to your Python path. This page should provide a good overview, but you might
+also want to check out the
+`original pypath-magic article <http://tonysyu.github.io/pypath-magic.html>`_
+and the
+`article introducing the command-line interface <http://tonysyu.github.io/pypath-magic-v03.html>`_
+
+Unlike modifications to ``sys.path``, this allows you to easily modify your
+path across sessions. Unlike modifications to environment variables, this
+doesn't require you to explain to users, students, and colleagues how to modify
+environment variables.
+
+
+Command-line interface
+======================
+
+In addition to the namesake IPython magic interface, version 0.3 adds a
+command-line interface (CLI) that resembles the IPython interface. After
+installing the latest version (``pip install pypath_magic``), you'll have
+access to a ``pypath`` command in your favorite terminal/shell.
+
+An example IPython workflow with ``pypath-magic`` is described below. The CLI
+has a similar interface::
+
+   pypath <command> [PATH]
+
+The standard commands are::
+
+   pypath add [PATH]       Add path to user's Python path.
+   pypath delete [PATH]    Delete path from user's Python path.
+   pypath [list]           List all paths defined by user.
+   pypath list-all         List all paths in user's Python path.
+   pypath path-file        Print path to user's path file.
+
+Continue below to this in action for the IPython interface.
+
+
+IPython magic
+=============
 
 ``pypath-magic`` adds an `IPython magic`_ (err... Jupyter_ magic?) command for
 easily manipulating your Python path. To use the magic command, just load the
@@ -82,7 +121,7 @@ Install
 
 To install using pip::
 
-   $ pip install git+https://github.com/tonysyu/pypath-magic
+   $ pip install pypath_magic
 
 To install from source::
 
