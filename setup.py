@@ -2,7 +2,7 @@
 import setuptools
 
 
-VERSION = '0.2.1'
+VERSION = '0.3.0'
 
 
 with open('README.rst') as f:
@@ -11,7 +11,7 @@ with open('README.rst') as f:
 
 setup_kwargs = {
     'name': 'pypath_magic',
-    'description': "Python magic to manipulate the Python path",
+    'description': "IPython magic and CLI to manipulate the Python path",
     'long_description': long_description,
     'author': 'Tony S. Yu',
     'author_email': 'tsyu80@gmail.com',
